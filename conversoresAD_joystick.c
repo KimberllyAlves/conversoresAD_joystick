@@ -21,6 +21,10 @@
 #define LED_PIN_BLUE 12 
 #define LED_PIN_GREEN 11 
 
+#define pos_central 2250
+
+int estado_led_verde = false;
+
 uint pwm_init_gpio(uint gpio, uint wrap) {
     gpio_set_function(gpio, GPIO_FUNC_PWM);
 
@@ -34,8 +38,7 @@ uint pwm_init_gpio(uint gpio, uint wrap) {
 int main()
 {
   stdio_init_all();
-  // I2C Initialisation. Using it at 400Khz.
-  i2c_init(I2C_PORT, 400 * 1000);
+  
   adc_init(); 
   adc_gpio_init(VRX_PIN); 
   adc_gpio_init(VRY_PIN); 
@@ -49,7 +52,8 @@ int main()
   gpio_init(LED_PIN_GREEN);
   gpio_set_dir(LED_PIN_GREEN, GPIO_OUT);
 
-
+  // I2C Initialisation. Using it at 400Khz.
+  i2c_init(I2C_PORT, 400 * 1000);
   gpio_set_function(I2C_SDA, GPIO_FUNC_I2C); // Set the GPIO pin function to I2C
   gpio_set_function(I2C_SCL, GPIO_FUNC_I2C); // Set the GPIO pin function to I2C
   gpio_pull_up(I2C_SDA); // Pull up the data line
@@ -78,31 +82,40 @@ int main()
     uint16_t vry_value = adc_read(); 
     bool sw_value = gpio_get(SW_PIN) == 0;
 
-    pwm_set_gpio_level(LED_PIN_RED, vrx_value); 
-    pwm_set_gpio_level(LED_PIN_BLUE, vry_value); 
+    if (vrx_value > pos_central) {
+      pwm_set_gpio_level(LED_PIN_RED, vrx_value);
+    }
+    else  pwm_set_gpio_level(LED_PIN_RED, 0);
 
+    if (vry_value > pos_central) {
+      pwm_set_gpio_level(LED_PIN_BLUE, vry_value); 
+    }
+    else  pwm_set_gpio_level(LED_PIN_BLUE, 0);
 
-    float duty_cycle_RED = (vrx_value / 4095.0) * 100;  
-    float duty_cycle_BLUE = (vry_value / 4095.0) * 100;
+    if (sw_value) { 
+      estado_led_verde = !estado_led_verde;
+      gpio_put(LED_PIN_GREEN, estado_led_verde); 
+      sleep_ms(200);
+    } 
 
     uint32_t current_time = to_ms_since_boot(get_absolute_time());  
     if (current_time - last_print_time >= 1000) {  
-        printf("VRX: %u\n", vrx_value); 
-        printf("Duty Cycle LED_RED: %.2f%%\n", duty_cycle_RED); 
+        printf("VRX: %u\n", vrx_value);  
         printf("VRY: %u\n", vry_value); 
-        printf("Duty Cycle LED_BLUE: %.2f%%\n", duty_cycle_BLUE);
         last_print_time = current_time;  
     }
+    // Mapeia os valores do joystick para as coordenadas do display (128x64 pixels)
+    int x_pos = (vrx_value * (128 - 8)) / 4095;              // Ajusta X para a largura do display (0 a 120)
+    int y_pos = (64 - 8) - (vry_value * (64 - 8)) / 4095;   // Ajusta Y para a altura do display (0 a 56), invertendo para corresponder ao display
 
-    cor = !cor;
     // Atualiza o conteúdo do display com animações
     ssd1306_fill(&ssd, !cor); // Limpa o display
     ssd1306_rect(&ssd, 3, 3, 122, 58, cor, !cor); // Desenha um retângulo
-    ssd1306_draw_string(&ssd, "CEPEDI   TIC37", 8, 10); // Desenha uma string
-    ssd1306_draw_string(&ssd, "EMBARCATECH", 20, 30); // Desenha uma string
-    ssd1306_draw_string(&ssd, "PROF WILTON", 15, 48); // Desenha uma string      
+    ssd1306_rect(&ssd, y_pos, x_pos, 8, 8, cor, cor);      
     ssd1306_send_data(&ssd); // Atualiza o display
 
-    sleep_ms(1000);
+    sleep_ms(100);
   }
+
+  return 0;
 }
