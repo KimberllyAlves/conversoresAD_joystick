@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = 'build/conversoresAD_joystick.uf2'
+elf = 'build/conversoresAD_joystick.elf'
