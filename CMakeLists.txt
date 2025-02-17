@@ -41,7 +41,7 @@ pico_set_program_name(conversoresAD_joystick "conversoresAD_joystick")
 pico_set_program_version(conversoresAD_joystick "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(conversoresAD_joystick 0)
+pico_enable_stdio_uart(conversoresAD_joystick 1)
 pico_enable_stdio_usb(conversoresAD_joystick 1)
 
 # Add the standard library to the build
@@ -56,6 +56,8 @@ target_include_directories(conversoresAD_joystick PRIVATE
 # Add any user requested libraries
 target_link_libraries(conversoresAD_joystick 
         hardware_i2c
+        hardware_adc
+        hardware_pwm
         )
 
 pico_add_extra_outputs(conversoresAD_joystick)
