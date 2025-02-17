@@ -1,6 +1,5 @@
 # Projeto de Controle com Joystick e Display OLED 🎮💡
 
-## Descrição 📜
 Este projeto utiliza um joystick para controlar LEDs via PWM e exibir informações em um display OLED SSD1306, rodando no Raspberry Pi Pico. 📊✨
 
 ## Funcionalidades 🔧
