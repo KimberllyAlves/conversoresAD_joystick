@@ -24,6 +24,7 @@
 #define pos_central 2250
 
 int estado_led_verde = false;
+int tipo_borda = 0;
 
 uint pwm_init_gpio(uint gpio, uint wrap) {
     gpio_set_function(gpio, GPIO_FUNC_PWM);
@@ -94,7 +95,9 @@ int main()
 
     if (sw_value) { 
       estado_led_verde = !estado_led_verde;
-      gpio_put(LED_PIN_GREEN, estado_led_verde); 
+      gpio_put(LED_PIN_GREEN, estado_led_verde);
+      tipo_borda++; 
+      if (tipo_borda >= 3) tipo_borda = 0;
       sleep_ms(200);
     } 
 
@@ -110,7 +113,12 @@ int main()
 
     // Atualiza o conteúdo do display com animações
     ssd1306_fill(&ssd, !cor); // Limpa o display
-    ssd1306_rect(&ssd, 3, 3, 122, 58, cor, !cor); // Desenha um retângulo
+    if (tipo_borda == 1) ssd1306_rect(&ssd, 0, 0, 128, 64, cor, !cor); // Desenha um retângulo
+    if (tipo_borda == 2) {
+      ssd1306_rect(&ssd, 0, 0, 128, 64, cor, !cor); // Desenha um retângulo
+      //ssd1306_rect(&ssd, 2, 2, 127, 63, cor, !cor); // Desenha um retângulo
+      ssd1306_rect(&ssd, 3, 3, 122, 58, cor, !cor);  // Retângulo preenchido
+    }
     ssd1306_rect(&ssd, y_pos, x_pos, 8, 8, cor, cor);      
     ssd1306_send_data(&ssd); // Atualiza o display
 
