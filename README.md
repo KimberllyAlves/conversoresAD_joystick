@@ -48,3 +48,4 @@ Conectar os componentes conforme os pinos definidos no código. 📍
 
 ## Vídeo de Demonstração 📹
 
+[Assista ao vídeo](https://drive.google.com/file/d/1P_iAskm_qKFHCS32PvWgVKL1Yz1IDYUe/view?usp=sharing)
